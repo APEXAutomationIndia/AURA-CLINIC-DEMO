@@ -1,0 +1,485 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Aura Wellness Clinic — AI Receptionist</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:wght@300;400;500&display=swap');
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: 'DM Sans', sans-serif;
+    background: #0a0f0e;
+    color: #f0ede8;
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .container {
+    width: 100%;
+    max-width: 420px;
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+    background: #0f1412;
+  }
+
+  .header {
+    padding: 20px 24px 16px;
+    border-bottom: 1px solid #1a2520;
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    background: #0f1412;
+  }
+
+  .avatar {
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #4CAF8A, #2d7a5e);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 18px;
+    flex-shrink: 0;
+  }
+
+  .header-info h1 {
+    font-family: 'DM Serif Display', serif;
+    font-size: 16px;
+    font-weight: 400;
+    color: #f0ede8;
+    letter-spacing: 0.01em;
+  }
+
+  .header-info p {
+    font-size: 11px;
+    color: #5ebd78;
+    font-weight: 300;
+    letter-spacing: 0.04em;
+    margin-top: 2px;
+  }
+
+  .header-actions {
+    margin-left: auto;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .call-btn {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #4CAF8A, #2d7a5e);
+    border: none;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-decoration: none;
+    transition: opacity 0.2s, transform 0.1s;
+    flex-shrink: 0;
+  }
+
+  .call-btn:hover { opacity: 0.9; transform: scale(1.05); }
+  .call-btn:active { transform: scale(0.95); }
+
+  .call-btn svg { width: 16px; height: 16px; fill: #fff; }
+
+  .call-label {
+    font-size: 9px;
+    color: #4CAF8A;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+  }
+
+  .powered {
+    font-size: 9px;
+    color: #333;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+  }
+
+  .messages {
+    flex: 1;
+    overflow-y: auto;
+    padding: 24px 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    scroll-behavior: smooth;
+  }
+
+  .messages::-webkit-scrollbar { width: 0; }
+
+  .msg {
+    max-width: 80%;
+    padding: 12px 16px;
+    border-radius: 18px;
+    font-size: 14px;
+    line-height: 1.55;
+    font-weight: 300;
+  }
+
+  .msg.bot {
+    background: #162019;
+    color: #e8e4de;
+    border-bottom-left-radius: 4px;
+    align-self: flex-start;
+    border: 1px solid #1e2e25;
+  }
+
+  .msg.user {
+    background: linear-gradient(135deg, #4CAF8A, #2d7a5e);
+    color: #fff;
+    border-bottom-right-radius: 4px;
+    align-self: flex-end;
+    font-weight: 400;
+  }
+
+  .typing {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    padding: 14px 16px;
+    background: #162019;
+    border: 1px solid #1e2e25;
+    border-radius: 18px;
+    border-bottom-left-radius: 4px;
+    width: fit-content;
+    align-self: flex-start;
+  }
+
+  .dot {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: #4CAF8A;
+    animation: bounce 1.2s infinite;
+  }
+
+  .dot:nth-child(2) { animation-delay: 0.2s; }
+  .dot:nth-child(3) { animation-delay: 0.4s; }
+
+  @keyframes bounce {
+    0%, 60%, 100% { transform: translateY(0); opacity: 0.4; }
+    30% { transform: translateY(-5px); opacity: 1; }
+  }
+
+  .input-area {
+    padding: 16px;
+    border-top: 1px solid #1a2520;
+    display: flex;
+    gap: 10px;
+    align-items: flex-end;
+    background: #0f1412;
+  }
+
+  .input-area textarea {
+    flex: 1;
+    background: #162019;
+    border: 1px solid #1e2e25;
+    border-radius: 12px;
+    padding: 12px 16px;
+    color: #f0ede8;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 14px;
+    font-weight: 300;
+    resize: none;
+    outline: none;
+    max-height: 100px;
+    line-height: 1.5;
+    transition: border-color 0.2s;
+  }
+
+  .input-area textarea::placeholder { color: #334; }
+  .input-area textarea:focus { border-color: #4CAF8A44; }
+
+  .send-btn {
+    width: 42px;
+    height: 42px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #4CAF8A, #2d7a5e);
+    border: none;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    transition: opacity 0.2s, transform 0.1s;
+  }
+
+  .send-btn:hover { opacity: 0.9; transform: scale(1.05); }
+  .send-btn:active { transform: scale(0.95); }
+  .send-btn:disabled { opacity: 0.4; cursor: not-allowed; transform: none; }
+  .send-btn svg { width: 18px; height: 18px; fill: #fff; }
+
+  .branding {
+    text-align: center;
+    padding: 8px;
+    font-size: 10px;
+    color: #222;
+    letter-spacing: 0.05em;
+  }
+
+  .intro {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 24px;
+  }
+
+  .intro-inner {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+  }
+
+  .intro-badge {
+    display: inline-block;
+    background: #4CAF8A22;
+    border: 1px solid #4CAF8A44;
+    color: #4CAF8A;
+    font-size: 10px;
+    letter-spacing: 0.12em;
+    padding: 4px 12px;
+    border-radius: 20px;
+    width: fit-content;
+  }
+
+  .intro-inner h2 {
+    font-family: 'DM Serif Display', serif;
+    font-size: 24px;
+    font-weight: 400;
+    line-height: 1.2;
+    color: #f0ede8;
+  }
+
+  .intro-inner p {
+    font-size: 13px;
+    color: #888;
+    line-height: 1.6;
+    font-weight: 300;
+  }
+
+  .intro-inner ul {
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .intro-inner ul li {
+    font-size: 13px;
+    color: #bbb;
+    font-weight: 300;
+  }
+
+  .intro-btns {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    margin-top: 8px;
+  }
+
+  .try-btn {
+    background: linear-gradient(135deg, #4CAF8A, #2d7a5e);
+    color: #fff;
+    border: none;
+    border-radius: 12px;
+    padding: 14px 24px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+    width: 100%;
+    transition: opacity 0.2s;
+    text-align: center;
+  }
+
+  .try-btn:hover { opacity: 0.9; }
+
+  .call-demo-btn {
+    background: transparent;
+    color: #4CAF8A;
+    border: 1px solid #4CAF8A44;
+    border-radius: 12px;
+    padding: 13px 24px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 14px;
+    font-weight: 400;
+    cursor: pointer;
+    width: 100%;
+    text-decoration: none;
+    display: block;
+    text-align: center;
+    transition: background 0.2s;
+  }
+
+  .call-demo-btn:hover { background: #4CAF8A11; }
+
+  .intro-note {
+    font-size: 11px;
+    color: #444;
+    text-align: center;
+  }
+</style>
+</head>
+<body>
+<div class="container">
+  <div class="header">
+    <div class="avatar">✦</div>
+    <div class="header-info">
+      <h1>Aura Wellness Clinic</h1>
+      <p>● Online — AI Receptionist</p>
+    </div>
+    <div class="header-actions">
+      <a class="call-btn" href="https://vapi.ai?demo=true&shareKey=03376f3b-31d3-4d0d-921d-b1c3c581d4ce&assistantId=4944c370-6b97-40a6-8ca3-410b4753a32a" target="_blank" title="Try Voice Call Demo">
+        <svg viewBox="0 0 24 24"><path d="M6.6 10.8c1.4 2.8 3.8 5.1 6.6 6.6l2.2-2.2c.3-.3.7-.4 1-.2 1.1.4 2.3.6 3.6.6.6 0 1 .4 1 1V20c0 .6-.4 1-1 1-9.4 0-17-7.6-17-17 0-.6.4-1 1-1h3.5c.6 0 1 .4 1 1 0 1.3.2 2.5.6 3.6.1.3 0 .7-.2 1L6.6 10.8z"/></svg>
+      </a>
+      <span class="powered">Jaipur</span>
+    </div>
+  </div>
+
+  <div class="intro" id="intro">
+    <div class="intro-inner">
+      <div class="intro-badge">LIVE DEMO</div>
+      <h2>Your clinic's AI receptionist.</h2>
+      <p>A working demo of an AI system built for Aura Wellness Clinic. It handles appointments, answers patient queries, and manages bookings — automatically, 24/7.</p>
+      <ul>
+        <li>✦ Books appointments & saves to Google Calendar</li>
+        <li>✦ Replies in English <span style="color:#4CAF8A">और Hindi में भी</span></li>
+        <li>✦ Handles calls when your staff can't</li>
+        <li>✦ Never misses a patient inquiry again</li>
+      </ul>
+      <div class="intro-btns">
+        <button class="try-btn" onclick="startDemo()">Try chat demo →</button>
+        <a class="call-demo-btn" href="https://vapi.ai?demo=true&shareKey=03376f3b-31d3-4d0d-921d-b1c3c581d4ce&assistantId=4944c370-6b97-40a6-8ca3-410b4753a32a" target="_blank">📞 Try voice call demo</a>
+      </div>
+      <p class="intro-note">Type anything — ask about services, book an appointment, try Hindi.</p>
+    </div>
+  </div>
+
+  <div class="messages" id="messages" style="display:none">
+    <div class="msg bot">Welcome to Aura Wellness Clinic. How can I assist you today?</div>
+  </div>
+
+  <div class="input-area" id="inputArea" style="display:none">
+    <textarea
+      id="input"
+      placeholder="Type in English या Hindi में..."
+      rows="1"
+      onkeydown="handleKey(event)"
+      oninput="autoResize(this)"
+    ></textarea>
+    <button class="send-btn" id="sendBtn" onclick="sendMessage()">
+      <svg viewBox="0 0 24 24"><path d="M2 21l21-9L2 3v7l15 2-15 2z"/></svg>
+    </button>
+  </div>
+  <div class="branding">Powered by AI · Aura Wellness Clinic</div>
+</div>
+
+<script>
+  const WEBHOOK_URL = 'https://dnuzkp7hym6o.share.zrok.io/webhook/822e8406-584f-4704-a513-e8459085f833/chat';
+
+  let sessionId = 'session_' + Math.random().toString(36).substr(2, 9);
+  let isWaiting = false;
+
+  function startDemo() {
+    document.getElementById('intro').style.display = 'none';
+    document.getElementById('messages').style.display = 'flex';
+    document.getElementById('inputArea').style.display = 'flex';
+    document.getElementById('input').focus();
+  }
+
+  function autoResize(el) {
+    el.style.height = 'auto';
+    el.style.height = Math.min(el.scrollHeight, 100) + 'px';
+  }
+
+  function handleKey(e) {
+    if (e.key === 'Enter' && !e.shiftKey) {
+      e.preventDefault();
+      sendMessage();
+    }
+  }
+
+  function addMessage(text, type) {
+    const messages = document.getElementById('messages');
+    const div = document.createElement('div');
+    div.className = `msg ${type}`;
+    div.textContent = text;
+    messages.appendChild(div);
+    messages.scrollTop = messages.scrollHeight;
+    return div;
+  }
+
+  function showTyping() {
+    const messages = document.getElementById('messages');
+    const div = document.createElement('div');
+    div.className = 'typing';
+    div.id = 'typing';
+    div.innerHTML = '<div class="dot"></div><div class="dot"></div><div class="dot"></div>';
+    messages.appendChild(div);
+    messages.scrollTop = messages.scrollHeight;
+  }
+
+  function removeTyping() {
+    const t = document.getElementById('typing');
+    if (t) t.remove();
+  }
+
+  async function sendMessage() {
+    if (isWaiting) return;
+    const input = document.getElementById('input');
+    const text = input.value.trim();
+    if (!text) return;
+
+    input.value = '';
+    input.style.height = 'auto';
+    addMessage(text, 'user');
+
+    isWaiting = true;
+    document.getElementById('sendBtn').disabled = true;
+    showTyping();
+
+    try {
+      const response = await fetch(WEBHOOK_URL, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          chatInput: text,
+          sessionId: sessionId
+        })
+      });
+
+      const data = await response.json();
+      removeTyping();
+
+      let reply = data.output || data.text || data.message || data.response || 'Sorry, something went wrong.';
+
+      if (reply.includes('BOOKING_DATA')) {
+        reply = reply.split('BOOKING_DATA')[0].trim();
+      }
+
+      addMessage(reply, 'bot');
+    } catch (err) {
+      removeTyping();
+      addMessage('Connection issue — please try again.', 'bot');
+    }
+
+    isWaiting = false;
+    document.getElementById('sendBtn').disabled = false;
+    document.getElementById('input').focus();
+  }
+</script>
+</body>
+</html>
